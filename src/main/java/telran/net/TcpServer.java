@@ -5,11 +5,11 @@ import java.util.*;
 
 public class TcpServer extends Thread
 {
+	protected static final int TIMEOUT = 1000;
 	Protocol protocol;
 	int port;
 	boolean running=true;
-	boolean notRun=false;
-	List<TcpClientServerSession> sessions=new LinkedList<TcpClientServerSession>();
+	
 
 	public TcpServer(Protocol protocol, int port)
 	{
@@ -23,21 +23,19 @@ public class TcpServer extends Thread
 		try(ServerSocket serverSocket=new ServerSocket(port))
 		// TODO using ServerSocket has the method setSoTimeout
 		{
-			serverSocket.setSoTimeout(3000);
+			serverSocket.setSoTimeout(TIMEOUT);
 			System.out.println("Server is listening on port "+port);
 			while(running)
 			{
 				try
 				{
 				Socket socket=serverSocket.accept();
-				TcpClientServerSession session=new TcpClientServerSession(socket,protocol);
-				sessions.add(session);
-				session.start();
-			
+				TcpClientServerSession session=new TcpClientServerSession(socket,protocol,this);
+				session.start();		
 				}
 				catch (SocketTimeoutException e)
 				{
-					if(notRun) shutdown();
+					
 				}
 				
 			}
@@ -52,16 +50,10 @@ public class TcpServer extends Thread
 	}
 	
 	public void shutdown()
-	{
-		
-		for(TcpClientServerSession ses:sessions)
-		{
-			ses.makeExc();
-		}
+	{	
 		running=false;
 	}
-	public void makeExc() 
-	{
-		notRun=true;
-	}
+	
+	
+
 }
