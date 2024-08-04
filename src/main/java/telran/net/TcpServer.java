@@ -3,6 +3,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class TcpServer extends Thread
@@ -65,6 +66,15 @@ public class TcpServer extends Thread
 	
 	public void shutdown()
 	{	
+		executor.shutdown();
+		try 
+		{
+			executor.awaitTermination(1, TimeUnit.HOURS);
+		}
+		catch (InterruptedException e) 
+		{
+			//no interrupts
+		}
 		running=false;
 	}
 	
