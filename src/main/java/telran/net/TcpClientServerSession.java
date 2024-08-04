@@ -33,7 +33,7 @@ public class TcpClientServerSession extends Thread
 				boolean socketClosed=false;
 			// FIXME
 			// figure out solution for exiting from the thread after shutdown				
-				while( tcpServer.running && !socketClosed && line!=null )
+				while( tcpServer.running && !socketClosed )
 				{
 					try
 					{
