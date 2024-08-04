@@ -1,6 +1,8 @@
 package telran.net;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class TcpServer extends Thread
@@ -9,15 +11,27 @@ public class TcpServer extends Thread
 	Protocol protocol;
 	int port;
 	boolean running=true;
-	
+	ExecutorService executor;
 
 	public TcpServer(Protocol protocol, int port)
 	{
 		super();
 		this.protocol = protocol;
 		this.port = port;
+		executor = Executors.newFixedThreadPool(getNumberOfThreads());
 	}
 	
+	private int getNumberOfThreads() 
+	{
+		Runtime runtime = Runtime.getRuntime();
+		return runtime.availableProcessors();
+	}
+	
+	public ExecutorService getExecutor()
+	{
+		return executor;
+	}
+
 	public void run()
 	{
 		try(ServerSocket serverSocket=new ServerSocket(port))
@@ -31,7 +45,7 @@ public class TcpServer extends Thread
 				{
 				Socket socket=serverSocket.accept();
 				TcpClientServerSession session=new TcpClientServerSession(socket,protocol,this);
-				session.start();		
+				executor.execute(session);
 				}
 				catch (SocketTimeoutException e)
 				{

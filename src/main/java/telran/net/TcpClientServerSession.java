@@ -30,13 +30,15 @@ public class TcpClientServerSession extends Thread
 			)
 		{
 				String line="";
+				boolean socketClosed=false;
 			// FIXME
 			// figure out solution for exiting from the thread after shutdown				
-				while( tcpServer.running && !socket.isClosed() && line!=null )
+				while( tcpServer.running && !socketClosed && line!=null )
 				{
 					try
 					{
 						line=receiver.readLine();
+						if(line==null) break;
 						nowWaitTime=0;
 						String responseStr= protocol.getResponseWithJSON(line);
 						sender.println(responseStr);
@@ -46,23 +48,21 @@ public class TcpClientServerSession extends Thread
 						nowWaitTime+=tcpServer.TIMEOUT;
 						if(!tcpServer.running || nowWaitTime >WAIT_TIME ) 
 						{			
+							socketClosed=true;
 							socket.close();
 						}
-				}
-			
-
+					}							
 			}
 			// TODO handling exception SocketTimeoutException for exiting from the thread on two conditions
 			// 1. Shutdown has been performed
 			// 2. Thread exists in IDLE state more than 1 minutes
 			// exiting from the cycle should be by closing connection
-			
 		}
 		catch(Exception e)
 		{
 			System.out.println(e);
 		}
-		
+
 	}
 	
 	public void shutdown()
